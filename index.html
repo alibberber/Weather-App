@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App - Easy Tutorials</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="search">
+        <input type="text" placeholder="enter city name" spellcheck="false">
+        <button><img src="images/search.png"></button>
+    </div>
+    <div class="error">
+        <p>Invalid city name</p>
+    </div>
+    <div class="weather">
+        <img src="images/rain.png" class="weather-icon">
+        <h1 class="temp">22°C</h1>
+        <h2 class="city">New York</h2>
+        <div class="details">
+            <div class="col">
+                <img src="images/humidity.png">
+                <div>
+                    <p class="humidity">50%</p>
+                    <p>Humidity</p>
+                </div>
+            </div>
+            <div class="col">
+                <img src="images/wind.png">
+                <div>
+                    <p class="wind">15 km/h</p>
+                    <p>Wind Speed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+const apiKEY = "e0a974e4c48570e0940ea8c346b896ca";
+const apiURL = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+const searchBox = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+const weatherIcon = document.querySelector(".weather-icon");
+
+// Add a global variable for the map
+let map;
+let selectedCoordinates = null;
+
+// Initialize the map on page load
+document.addEventListener("DOMContentLoaded", () => {
+  map = L.map("map").setView([0, 0], 1);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Event listener to update weather on map click
+  map.on("click", async (e) => {
+    const { lat, lng } = e.latlng;
+    selectedCoordinates = { lat, lng }; // Store the selected coordinates
+    await getWeatherByCoordinates(lat, lng);
+  });
+});
+
+// Update the checkWeather function to use coordinates
+async function checkWeather(city) {
+  let response;
+
+  if (selectedCoordinates && !city) {
+    // Use selected coordinates if available and no city name is provided
+    const { lat, lng } = selectedCoordinates;
+    response = await fetch(`${apiURL}&lat=${lat}&lon=${lng}&appid=${apiKEY}`);
+  } else {
+    // Use city name for weather lookup
+    response = await fetch(`${apiURL}${city}&appid=${apiKEY}`);
+  }
+
+  if (response.ok) {
+    const data = await response.json();
+    document.querySelector(".city").innerHTML = data.name;
+    document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+    document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+    document.querySelector(".wind").innerHTML = data.wind.speed + "km/h";
+
+    if (data.weather[0].main == "Clouds") {
+      weatherIcon.src = "images/clouds.png";
+    } else if (data.weather[0].main == "Clear") {
+      weatherIcon.src = "images/clear.png";
+    } else if (data.weather[0].main == "Rain") {
+      weatherIcon.src = "images/rain.png";
+    } else if (data.weather[0].main == "Drizzle") {
+      weatherIcon.src = "images/drizzle.png";
+    } else if (data.weather[0].main == "Mist") {
+      weatherIcon.src = "images/mist.png";
+    }
+
+    document.querySelector(".weather").style.display = "block";
+    document.querySelector(".error").style.display = "none";
+  } else {
+    document.querySelector(".error").style.display = "block";
+    document.querySelector(".weather").style.display = "none";
+  }
+}
+
+// Function to get weather by coordinates
+async function getWeatherByCoordinates(lat, lon) {
+  const response = await fetch(`${apiURL}&lat=${lat}&lon=${lon}&appid=${apiKEY}`);
+  if (response.ok) {
+    const data = await response.json();
+    const cityName = data.name;
+    checkWeather(cityName);
+    map.setView([lat, lon], 10);
+  } else {
+    document.querySelector(".error").style.display = "block";
+    document.querySelector(".weather").style.display = "none";
+  }
+}
+
+// Update the search button event listener to call checkWeather
+searchBtn.addEventListener("click", () => {
+  const cityName = searchBox.value;
+  selectedCoordinates = null; // Reset selected coordinates
+  checkWeather(cityName);
+  searchBox.value = "";
+});
+</script>
+</body>
+</html>
