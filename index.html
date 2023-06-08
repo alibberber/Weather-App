@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Weather App PROJECT</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+    <h2>Login Form</h2>
+    <form id="myForm">
+      <div class="search">
+        <label for="uname"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
+      </div>
+
+      <div class="search">
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+      </div>
+
+      <button type="button" onclick="login()">Login</button>
+    </form>
+</div>
+
+<script>
+function login() {
+  var username = document.getElementById('uname').value;
+  var password = document.getElementById('psw').value;
+
+  if(username == 'admin' && password == 'password') {
+    window.location.href = 'weather.html'; 
+  } else {
+    alert('Login failed');
+  }
+}
+</script>
+
+</body>
+</html>
