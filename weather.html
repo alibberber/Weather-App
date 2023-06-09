@@ -51,11 +51,11 @@ const searchBox = document.querySelector(".search input");
 const searchBtn = document.querySelector(".search button");
 const weatherIcon = document.querySelector(".weather-icon");
 
-// Add a global variable for the map
+
 let map;
 let selectedCoordinates = null;
 
-// Initialize the map on page load
+
 document.addEventListener("DOMContentLoaded", () => {
   map = L.map("map").setView([0, 0], 1);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     maxZoom: 19,
   }).addTo(map);
 
-  // Event listener to update weather on map click
+ 
   map.on("click", async (e) => {
     const { lat, lng } = e.latlng;
     selectedCoordinates = { lat, lng }; // Store the selected coordinates
@@ -71,16 +71,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Update the checkWeather function to use coordinates
+
 async function checkWeather(city) {
   let response;
 
   if (selectedCoordinates && !city) {
-    // Use selected coordinates if available and no city name is provided
+    
     const { lat, lng } = selectedCoordinates;
     response = await fetch(`${apiURL}&lat=${lat}&lon=${lng}&appid=${apiKEY}`);
   } else {
-    // Use city name for weather lookup
+    
     response = await fetch(`${apiURL}${city}&appid=${apiKEY}`);
   }
 
@@ -111,7 +111,7 @@ async function checkWeather(city) {
   }
 }
 
-// Function to get weather by coordinates
+
 async function getWeatherByCoordinates(lat, lon) {
   const response = await fetch(`${apiURL}&lat=${lat}&lon=${lon}&appid=${apiKEY}`);
   if (response.ok) {
@@ -125,24 +125,23 @@ async function getWeatherByCoordinates(lat, lon) {
   }
 }
 
-// Update the search button event listener to call checkWeather
-// Update the search button event listener to call checkWeather
+
 searchBtn.addEventListener("click", () => {
   const cityName = searchBox.value;
 
-  // Call the geocoding API
+  
   fetch(`https://nominatim.openstreetmap.org/search?city=${cityName}&format=json`)
   .then(response => response.json())
   .then(data => {
       if (data.length > 0) {
-          // Take the first result and get its latitude and longitude
+          
           const lat = parseFloat(data[0].lat);
           const lon = parseFloat(data[0].lon);
 
-          // Set the view of the map to the coordinates with a zoom level of 10
+          
           map.setView([lat, lon], 10);
 
-          // Fetch weather data
+          
           checkWeather(cityName);
       } else {
           console.log("City not found");
